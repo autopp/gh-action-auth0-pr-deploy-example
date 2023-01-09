@@ -1,0 +1,14 @@
+name: pr-open
+
+on:
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: get pr number
+        run: |
+          jq -r .pull_request.number "$GITHUB_EVENT_PATH"
