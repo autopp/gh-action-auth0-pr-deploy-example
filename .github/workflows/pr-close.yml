@@ -1,9 +1,11 @@
-name: pr-open
+name: pr-close
 
 on:
   pull_request:
     branches:
       - "main"
+    types:
+      - closed
 
 jobs:
   main:
@@ -28,9 +30,9 @@ jobs:
           echo "The request access token was succeeded"
           CALLBACKS=$(curl -f -s -H "Authorization: Bearer ${ACCESS_TOKEN}" "https://${AUTH0_DOMAIN}/api/v2/clients/${AUTH0_CLIENT_ID}" | jq -c .callbacks)
           CALLBACK_URL=$(printf "${AUTH0_CALLBACK_URL}" $(jq -r .pull_request.number "$GITHUB_EVENT_PATH"))
-          if [ $(echo ${CALLBACKS} | jq "index(\"${CALLBACK_URL}\")") != null ]; then
-            echo The callback URL was already registered
+          if [ $(echo ${CALLBACKS} | jq "index(\"${CALLBACK_URL}\")") = null ]; then
+            echo The callback URL was already removed
             exit 0
           fi
-          curl -f -X PATCH -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d "{\"callbacks\":$(echo ${CALLBACKS} | jq -c ". += [\"${CALLBACK_URL}\"]")}" "https://${AUTH0_DOMAIN}/api/v2/clients/${AUTH0_CLIENT_ID}" >/dev/null
-          echo The callback URL registeration succeeded
+          curl -f -X PATCH -H "Authorization: Bearer ${ACCESS_TOKEN}" -H "Content-Type: application/json" -d "{\"callbacks\":$(echo ${CALLBACKS} | jq -c ". -= [\"${CALLBACK_URL}\"]")}" "https://${AUTH0_DOMAIN}/api/v2/clients/${AUTH0_CLIENT_ID}" >/dev/null
+          echo The callback URL removal was succeeded
