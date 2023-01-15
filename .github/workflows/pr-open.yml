@@ -9,7 +9,7 @@ jobs:
   add-review-app-config:
     runs-on: ubuntu-latest
     steps:
-      - name: Add review app config
+      - name: add review app config
         uses: 'autopp/action-auth0-update-client@v1'
         with:
           domain: ${{ secrets.AUTH0_DOMAIN }}
